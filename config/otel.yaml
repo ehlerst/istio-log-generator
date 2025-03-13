@@ -1,0 +1,42 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  transform:
+    log_statements:
+      - statements:
+          - merge_maps(log.cache, ParseJSON(log.body), "upsert") where IsMatch(log.body, "^\\{") 
+          - set(log.attributes["trace_id"], log.cache["trace_id"])
+          - set(log.attributes["downstream_remote_address"], log.cache["downstream_remote_address"])
+          - set(log.attributes["downstream_local_address"], log.cache["downstream_local_address"])
+          - set(log.attributes["duration"], log.cache["duration"])
+          - set(log.attributes["upstream_service_time"], log.cache["upstream_service_time"])
+          - set(log.attributes["upstream_cluster"], log.cache["upstream_cluster"])
+          - set(log.attributes["authority"], log.cache["authority"])
+          - set(log.attributes["bytes_sent"], log.cache["bytes_sent"])
+          - set(log.attributes["response_code"], log.cache["response_code"])
+  attributes:
+    actions:
+    - action: insert
+      key: loki.attribute.labels
+      value: log.attributes.response_code,log.attributes.trace_id,log.attributes.downstream_remote_address,log.attributes.downstream_local_address,log.attributes.duration,log.attributes.upstream_service_time,log.attributes.upstream_cluster,log.attributes.authority,log.attributes.bytes_sent 
+exporters:
+  loki:
+    endpoint: "http://localhost:3100/loki/api/v1/push"
+  debug:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+extensions:
+  health_check:
+service:
+  extensions:
+  - health_check
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [transform,attributes]
+      exporters: [loki,debug]

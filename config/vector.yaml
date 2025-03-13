@@ -1,0 +1,23 @@
+sources:
+  otel_in:
+    type: opentelemetry
+    grpc:
+      address: 0.0.0.0:4317
+    http:
+      address: 0.0.0.0:4318
+      headers: []
+      keepalive:
+        max_connection_age_jitter_factor: 0.1
+        max_connection_age_secs: 300
+sinks:
+  loki:
+    encoding:
+      codec: json
+    labels:
+      job: istio-log-generator
+    type: loki
+    compression: snappy
+    inputs:
+      - otel_in.logs
+    endpoint: http://localhost:3100
+    path: /loki/api/v1/push
