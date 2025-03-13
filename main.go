@@ -63,7 +63,7 @@ func main() {
 		
 		logger.InfoContext(context.Background(), string(json))
 
-		if totalSent > 1024*1024 * 1 { // GB
+		if totalSent > 1024*1024*1024 * 1 { // GB
 			break
 		}
 	}
