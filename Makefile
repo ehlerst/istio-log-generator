@@ -3,3 +3,14 @@ otel:
 
 run:
 	go run main.go
+
+start-loki:
+	-docker volume create --name=grafana-data
+	docker-compose up -d
+
+clean-loki:
+	docker-compose down
+	sudo rm -rf data/*
+	-docker volume rm grafana-data
+
+

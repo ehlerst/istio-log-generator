@@ -2,7 +2,9 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
+        endpoint: 0.0.0.0:4318
 
 processors:
   transform:
@@ -25,7 +27,7 @@ processors:
       value: log.attributes.response_code,log.attributes.trace_id,log.attributes.downstream_remote_address,log.attributes.downstream_local_address,log.attributes.duration,log.attributes.upstream_service_time,log.attributes.upstream_cluster,log.attributes.authority,log.attributes.bytes_sent 
 exporters:
   loki:
-    endpoint: "http://localhost:3100/loki/api/v1/push"
+    endpoint: "http://loki:3100/loki/api/v1/push"
   debug:
     verbosity: detailed
     sampling_initial: 5
@@ -38,5 +40,5 @@ service:
   pipelines:
     logs:
       receivers: [otlp]
-      processors: [transform,attributes]
-      exporters: [loki,debug]
+#      processors: [transform,attributes]
+      exporters: [loki]

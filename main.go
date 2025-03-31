@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"context"
-	"math/rand"
-	"time"
 
 	"encoding/json"
 
@@ -14,6 +12,10 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
 	"go.opentelemetry.io/otel/sdk/log"
 
+)
+
+const (
+	GB = 1024*1024*1024 * 1 
 )
 
 var 
@@ -40,22 +42,9 @@ func main() {
 	totalSent := 0
 	for {
 		log := generate.GenerateIstioLog()
-		log.StartTime = time.Now()
-		log.TraceID = fmt.Sprintf("%x", rand.Int63())
-		log.ResponseCode = generate.GenerateRandomCode()
-		log.UpstreamLocalAddress = generate.GenerateRandomIP()
-		log.XDatadogTraceID = fmt.Sprintf("%x", rand.Int63())
-		log.BytesSent = rand.Intn(8096) + 512
-		log.DownstreamRemoteAddress = generate.GenerateRandomIP()
-		log.DownstreamLocalAddress = generate.GenerateRandomIP()
-		log.Duration = rand.Intn(500) + 100
-		log.UpstreamServiceTime = fmt.Sprintf("%d", rand.Intn(500) + 100)
-		log.UpstreamCluster = fmt.Sprintf("%x", rand.Int63())
-		log.Authority = fmt.Sprintf("%x", rand.Int63())
 		json, err := json.MarshalIndent(log, "", "  ")
 		b := len(json)
 		totalSent += b
-		fmt.Printf("Total bytes sent: %d\n", totalSent)
 		if err != nil {
 			fmt.Println("Error marshalling to JSON:", err)
 			return
@@ -63,7 +52,8 @@ func main() {
 		
 		logger.InfoContext(context.Background(), string(json))
 
-		if totalSent > 1024*1024*1024 * 1 { // GB
+		if totalSent > GB { 
+			fmt.Printf("Total bytes sent %d\n", totalSent)
 			break
 		}
 	}

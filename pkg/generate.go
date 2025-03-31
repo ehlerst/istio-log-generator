@@ -1,5 +1,6 @@
 package generate
 import (
+	"fmt"
 	"github.com/ehlerst/istio-log-generator/models"
 	"time"
 	"math/rand"
@@ -13,25 +14,29 @@ var (
 func GenerateIstioLog() models.IstioLog {
 	log := models.IstioLog{
 		ResponseFlags:                  "OK",
-		UpstreamLocalAddress:           "192.168.1.1:5678",
+		UpstreamLocalAddress:           GenerateRandomIP(),
 		UserAgent:                      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
 		RequestedServerName:            "example.com",
 		ResponseCodeDetails:            "details",
 		Path:                           "/api/v1/data",
 		XDatadogParentID:               "parent_id",
 		RequestID:                      "request_id",
-		Authority:                      "authority",
-		BytesReceived:                  1024,
-		DownstreamRemoteAddress:        "192.168.1.2:8080",
-		BytesSent:                      512,
+		Authority:                      fmt.Sprintf("%x", rand.Int63()),
+		BytesReceived:                  rand.Intn(8096) + 512,
+		DownstreamRemoteAddress:        GenerateRandomIP(),
+		BytesSent:                      rand.Intn(8096) + 512,
 		XEnvoyAttemptCount:             "1",
 		Protocol:                       "HTTP/1.1",
 		Method:                         "GET",
-		XForwardedFor:                  "192.168.1.3",
-		DownstreamLocalAddress:         "192.168.1.4:80",
+		XForwardedFor:                  GenerateRandomIP(),
+		DownstreamLocalAddress:         GenerateRandomIP(),
 		StartTime:                      time.Now(),
-		TraceID:                        "trace_id",
-		XDatadogTraceID:                "datadog_trace_id",
+		TraceID:                        fmt.Sprintf("%x", rand.Int63()),
+		XDatadogTraceID:                fmt.Sprintf("%x", rand.Int63()),
+		ResponseCode:	                GenerateRandomCode(),
+		Duration:                       rand.Intn(500) + 100,
+		UpstreamServiceTime:            fmt.Sprintf("%d", rand.Intn(500) + 100),
+		UpstreamCluster: fmt.Sprintf("%x", rand.Int63()),
 	}
 	return log
 

@@ -9,6 +9,10 @@ sources:
       keepalive:
         max_connection_age_jitter_factor: 0.1
         max_connection_age_secs: 300
+  internal_metrics:
+    type: internal_metrics
+    namespace: vector
+    scrape_interval_secs: 1
 sinks:
   loki:
     encoding:
@@ -16,8 +20,40 @@ sinks:
     labels:
       job: istio-log-generator
     type: loki
-    compression: snappy
+    compression: gzip
     inputs:
       - otel_in.logs
-    endpoint: http://localhost:3100
+    endpoint: http://loki:3100
     path: /loki/api/v1/push
+  openobserve:
+    type: http
+    inputs:
+      - otel_in.logs
+    uri: http://openobserve:5080/api/default/default/_json
+    method: post
+    auth:
+      strategy: basic
+      user: root@example.com
+      password: Complexpass#123
+    compression: gzip
+    encoding:
+      codec: json
+      timestamp_format: rfc3339
+    healthcheck:
+      enabled: false
+  splunk:
+    type: splunk_hec_logs
+    compression: gzip
+    encoding:
+      codec: json
+      timestamp_format: rfc3339
+    inputs:
+      - otel_in.logs
+    endpoint: http://splunk:8088/services/collector
+    default_token: "00000000-0000-0000-0000-0000000000000"
+  prometheus:
+    type: prometheus_exporter
+    inputs:
+      - internal_metrics
+    address: 0.0.0.0:9598
+    flush_period_secs: 10
